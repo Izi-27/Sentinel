@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// 1. Setup Groq Client
 const client = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
   baseURL: "https://api.groq.com/openai/v1",
@@ -22,58 +21,50 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { contractAddress } = body;
 
-    // --- DEBUG LOG 1: Check if Keys exist ---
-    if (!process.env.POLYGONSCAN_API_KEY) {
-      console.error("CRITICAL: PolygonScan API Key is MISSING in .env.local");
-      return NextResponse.json({ error: "Server Configuration Error: Missing API Key" }, { status: 500, headers: corsHeaders });
+    // 1. CHECK FOR NEW ETHERSCAN KEY
+    if (!process.env.ETHERSCAN_API_KEY) {
+      return NextResponse.json({ 
+        riskLevel: 'System Error', 
+        summary: "Missing ETHERSCAN_API_KEY. Please update .env.local with a V2 Unified Key.",
+        keyIssues: ["Config Error"]
+      }, { headers: corsHeaders });
     }
 
-    // --- STEP A: Fetch Code from PolygonScan ---
-    const polygonUrl = `https://api.polygonscan.com/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=${process.env.POLYGONSCAN_API_KEY}`;
+    // 2. FETCH FROM ETHERSCAN V2 (Unified Endpoint)
+    // chainid=137 is Polygon Mainnet
+    const v2Url = `https://api.etherscan.io/v2/api?chainid=137&module=contract&action=getsourcecode&address=${contractAddress}&apikey=${process.env.ETHERSCAN_API_KEY}`;
     
-    console.log(`Fetching from: ${polygonUrl}`); // <--- Print URL to console (Don't share this publicly)
-    
-    const polygonRes = await fetch(polygonUrl);
-    const polygonData = await polygonRes.json();
+    console.log("Fetching V2 URL..."); 
+    const response = await fetch(v2Url);
+    const data = await response.json();
 
-    // --- DEBUG LOG 2: What did PolygonScan actually say? ---
-    console.log("PolygonScan Response:", JSON.stringify(polygonData, null, 2));
-
-    // HANDLE SPECIFIC API ERRORS
-    if (polygonData.message === 'NOTOK') {
-      if (polygonData.result === 'Invalid API Key') {
-        return NextResponse.json({ 
-          riskLevel: 'System Error', 
-          summary: "INVALID API KEY. Please check your .env.local file. You might have extra spaces or quotes.",
-          keyIssues: ["Developer Error: Fix API Key"]
-        }, { headers: corsHeaders });
-      }
-      if (polygonData.result === 'Max rate limit reached') {
-        return NextResponse.json({ 
-          riskLevel: 'System Error', 
-          summary: "System is busy (Rate Limit). Please wait 5 seconds and try again.",
-          keyIssues: ["Rate Limit Exceeded"]
-        }, { headers: corsHeaders });
-      }
+    // 3. HANDLE API ERRORS
+    if (data.message === "NOTOK") {
+      console.error("V2 API Error:", data.result);
+      return NextResponse.json({ 
+        riskLevel: 'System Error', 
+        summary: `API Error: ${data.result}`, 
+        keyIssues: ["Check .env.local", "Verify Etherscan Key"]
+      }, { headers: corsHeaders });
     }
 
-    // HANDLE UNVERIFIED CODE
-    if (!polygonData.result[0].SourceCode) {
+    // 4. CHECK VERIFICATION
+    if (!data.result[0].SourceCode) {
       return NextResponse.json({ 
         riskScore: 100, 
         riskLevel: 'Unknown', 
-        summary: "Contract source code is NOT verified on PolygonScan. We cannot read the code.",
+        summary: "Contract source code is NOT verified. We cannot audit it.",
         keyIssues: ["Unverified Code", "High Risk"]
       }, { headers: corsHeaders });
     }
 
-    const sourceCode = polygonData.result[0].SourceCode;
+    const sourceCode = data.result[0].SourceCode;
 
-    // --- STEP B: Ask Groq (AI) to Audit ---
+    // 5. AI AUDIT
     const completion = await client.chat.completions.create({
       messages: [
         { role: "system", content: "You are a smart contract auditor. Return JSON only: { riskScore: number, riskLevel: 'Low'|'Medium'|'High', summary: string, keyIssues: string[] }" },
-        { role: "user", content: `Analyze this code: \n\n ${sourceCode.substring(0, 15000)}` }
+        { role: "user", content: `Analyze this code: \n\n ${sourceCode.substring(0, 20000)}` }
       ],
       model: "llama-3.3-70b-versatile",
       response_format: { type: "json_object" },
@@ -83,10 +74,7 @@ export async function POST(request: Request) {
     return NextResponse.json(analysis, { headers: corsHeaders });
 
   } catch (error) {
-    console.error("Audit Error Full Trace:", error);
-    return NextResponse.json(
-      { error: 'Audit failed', details: String(error) }, 
-      { status: 500, headers: corsHeaders }
-    );
+    console.error("Audit Error:", error);
+    return NextResponse.json({ error: 'Audit failed', details: String(error) }, { status: 500, headers: corsHeaders });
   }
 }

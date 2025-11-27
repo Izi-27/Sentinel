@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-
 export default function Home() {
   const [address, setAddress] = useState('');
   const [result, setResult] = useState<any>(null);
@@ -30,7 +29,7 @@ export default function Home() {
         
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-2">
+          <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-purple-400 to-pink-600 mb-2">
             SENTINEL
           </h1>
           <p className="text-gray-400">Polygon Smart Contract Risk Scanner</p>
@@ -57,8 +56,8 @@ export default function Home() {
         {/* Results Card */}
         {result && (
           <div className={`p-8 rounded-2xl border-2 shadow-2xl ${
-            result.riskLevel === 'High' ? 'border-red-500 bg-red-950/30' : 
-            result.riskLevel === 'Medium' ? 'border-yellow-500 bg-yellow-950/30' : 
+            (result.riskLevel === 'High' || result.riskLevel === 'Unknown') ? 'border-red-500 bg-red-950/30' :
+            result.riskLevel === 'Medium' ? 'border-yellow-500 bg-yellow-950/30' :
             'border-green-500 bg-green-950/30'
           }`}>
             <div className="flex justify-between items-start mb-6">
@@ -78,7 +77,7 @@ export default function Home() {
               <ul className="space-y-3">
                 {result.keyIssues?.map((issue: string, i: number) => (
                   <li key={i} className="flex items-start gap-3">
-                    <span className={`mt-1 h-2 w-2 rounded-full ${result.riskLevel === 'High' ? 'bg-red-500' : 'bg-yellow-500'}`} />
+                    <span className={`mt-1 h-2 w-2 rounded-full ${(result.riskLevel === 'High' || result.riskLevel === 'Unknown') ? 'bg-red-500' : 'bg-yellow-500'}`} />
                     <span>{issue}</span>
                   </li>
                 ))}
