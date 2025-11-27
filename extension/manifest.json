@@ -7,8 +7,7 @@
   "content_scripts": [
     {
       "matches": ["https://app.uniswap.org/*", "https://opensea.io/*"],
-      "js": ["content.js"],
-      "css": ["style.css"]
+      "js": ["content.js"]
     }
   ],
   "action": {

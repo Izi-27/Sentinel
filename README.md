@@ -1,53 +1,37 @@
 # Sentinel
-Sentinel provides real-time, AI-powered risk assessment for smart contracts, empowering users to interact with DeFi confidently.
 
-
-> AI-Powered Smart Contract Risk Assessment for Polygon
-
-Sentinel provides real-time, AI-powered risk assessment for smart contracts, empowering users to interact with DeFi confidently.
+Sentinel provides real-time risk assessment for smart contracts on Polygon, empowering users to interact with DeFi confidently through a web application and browser extension.
 
 ## 🚀 Features
 
-- **Smart Contract Risk Scoring**: Green/Yellow/Red ratings for any contract
-- **Browser Extension**: Seamless integration with popular DeFi dApps
-- **AI Analysis**: Fine-tuned LLM for vulnerability detection
-- **Transaction Simulation**: MEV and front-running detection
-- **Portfolio Scanner**: Analyze wallet-wide risk exposure
+- **Smart Contract Risk Scoring**: Basic Green/Yellow/Red ratings for contracts via API analysis
+- **Browser Extension**: Seamless integration with popular DeFi dApps (Uniswap, OpenSea)
+- **Web Application**: Next.js-based interface for contract auditing
+- **API Integration**: Fetches contract data from Polygon/blockchain APIs
 
 ## 🏗 Architecture
 
 ```
-
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Browser       │    │   Sentinel      │    │   Blockchain    │
-│   Extension     │────│   API           │────│   Polygon       │
-│   (React)       │    │   (Node.js)     │    │   Scan APIs     │
+│   Extension     │────│   Web App       │────│   Polygon       │
+│   (Manifest V3) │    │   (Next.js)     │    │   APIs          │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
-│
-┌─────────────────┐
-│   AI/ML         │
-│   Pipeline      │
-│   (Python)      │
-└─────────────────┘
-
 ```
 
 ## 🛠 Tech Stack
 
-- **Frontend**: React, TypeScript, Tailwind CSS
-- **Backend**: Node.js, Express, TypeScript
-- **AI/ML**: Python, Hugging Face, PyTorch
-- **Blockchain**: Polygon, Ethers.js, Hardhat
-- **Database**: PostgreSQL, Redis
-- **Infrastructure**: Docker, AWS, Vercel
+- **Frontend/Web App**: Next.js, React, TypeScript
+- **API**: Next.js API Routes
+- **Extension**: Manifest V3, JavaScript
+- **Blockchain**: Polygon, Ethers.js
 
 ## 📦 Quick Start
 
 ### Prerequisites
 
 - Node.js 18+
-- Python 3.9+
-- Docker
+- pnpm
 - Git
 
 ### Installation
@@ -57,77 +41,40 @@ Sentinel provides real-time, AI-powered risk assessment for smart contracts, emp
 git clone https://github.com/your-username/sentinel.git
 cd sentinel
 
-# Install dependencies
-npm run setup
+# Install dependencies for the web app
+cd sentinel
+pnpm install
 
-# Start development environment
-npm run dev
+# Start the development server
+pnpm dev
 ```
 
-🎯 Usage
+### Extension Development
 
-Web App
+To load the browser extension for development:
 
-1. Navigate to the web application
-2. Paste a contract address
+1. Open Chrome and navigate to `chrome://extensions`
+2. Enable "Developer mode" in the top right
+3. Click "Load unpacked" and select the `extension/` folder from the project root
+4. The extension will be loaded and available in the browser
+
+## 🎯 Usage
+
+### Web Application
+
+1. Navigate to `http://localhost:3000` (after running `pnpm dev` in `sentinel/`)
+2. Paste a contract address in the interface
 3. View the risk assessment report
 
-Browser Extension
+### Browser Extension
 
-1. Install the extension from Chrome Web Store
-2. Visit any DeFi dApp
-3. See risk scores directly in the UI
+1. Load the extension as described in Extension Development
+2. Visit supported DeFi sites (e.g., Uniswap or OpenSea)
+3. The extension will inject risk scores into the UI
 
+## 📈 Current Status
 
-
-This project is part of the Polygon Buildathon with the following roadmap:
-
-## Roadmap
-Phase 1: Sprint to Funding (Waves 1-5)
-
-Wave 1-2: Foundation & Setup
-
-1. Develop a basic React dApp UI for contract address input.
-2. Create a Node.js/Express backend API.
-3. Integrate with PolygonScan API to fetch contract code.
-4. Build a rule-based classifier to detect 3-5 common vulnerabilities (e.g., unlimited approval).
-5. Display a simple risk score (Green/Yellow/Red) on the dApp.
-6. Deploy the full stack on a testnet.
-
-Wave 3-4: Build & Optimize
-
-1. Develop and publish a Chrome extension MVP that injects the risk score into popular DeFi UIs.
-2. Replace the rule-based classifier with a fine-tuned open-source LLM (e.g., Llama 3) for analysis.
-3. Add a "Transaction Simulation" feature to check for potential MEV/front-running.
-4. Implement user accounts to save scan history.
-5. Launch a waitlist and acquire the first 100 active users.
-
-Wave 5: Pitch & Raise
-
-1. Compile all data (user growth, scans performed, vulnerabilities found).
-2. Finalize the pitch deck and demo video.
-3. Execute VC meetings facilitated by Polygon.
-4. Secure initial funding.
-
-Phase 2: Scale & Expand (Waves 6-10)
-
-Wave 6-7: Product Expansion
-
-1. Develop a "Portfolio Scanner" that analyzes a wallet's entire approved contract risk.
-2. Launch a premium subscription with advanced features (real-time exploit alerts).
-3. Form partnerships with 2-3 established DeFi protocols on Polygon.
-
-Wave 8-9: Monetization & Growth
-
-1. Launch a B2B API for other dApps and wallets to integrate our scoring.
-2. Implement the full freemium business model and fee structure.
-3. Run a targeted marketing campaign to reach 1,000+ daily active users.
-
-Wave 10: Enterprise Ready
-
-1. Develop an enterprise dashboard for VC firms and trading desks.
-2. Pass a third-party security audit for the entire system.
-3. Present the scaled product at a major event (e.g., ETHDenver).
+This project is in early development as part of the Polygon Buildathon. The current implementation includes a basic Next.js web app with an audit API route and a Chrome extension for DeFi integration. Future phases may expand features like advanced AI analysis, transaction simulation, and portfolio scanning.
 
 🤝 Contributing
 
@@ -139,10 +86,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 🔗 Links
 
-· Documentation
-· Polygon Buildathon
-· Demo Video
-
-
-
-
+- [Polygon Buildathon](https://polygon.technology/buildathon)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Chrome Extension Docs](https://developer.chrome.com/docs/extensions/mv3/getstarted/)
